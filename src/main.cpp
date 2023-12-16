@@ -1,6 +1,8 @@
+#include "credentials.h"
 #include <Arduino.h>
 #include <HTTPClient.h>
 #include <esp_wifi.h>
+#include <esp_wpa2.h>
 #include <wifi.h>
 
 #define LED_BUILTIN 2
@@ -9,25 +11,21 @@
 
 unsigned long lastRequest = 0;
 
-uint8_t macAdress[] = {0x44, 0x17, 0x93, 0x5e, 0x35, 0xcc};
+const char *ssid = "eduroam";
 
 void setup() {
   Serial.begin(115200);
-
-  // set wifi mode
-  WiFi.mode(WIFI_STA);
-
-  // change mac adress
-  esp_wifi_set_mac(WIFI_IF_STA, macAdress);
 
   // configure built in LED
   pinMode(LED_BUILTIN, OUTPUT);
 
   // connect to WiFi
   Serial.println("Connecting to WiFi...");
-  while (!WiFi.begin("NTNU-IOT", ""))
-    ;
 
+  // wifi credentials (identity, username, password) must be defined in a credentials.h file
+  WiFi.begin(ssid, WPA2_AUTH_PEAP, EAP_IDENTITY, EAP_USERNAME, EAP_PASSWORD);
+
+  // wait till connection succeeds
   while (WiFi.status() != WL_CONNECTED)
     ;
 
@@ -38,7 +36,7 @@ void setup() {
 
 void loop() {
   // make request with a preiod of REQUEST_FREQ
-  if (millis() - lastRequest > REQUEST_FREQ) {
+  if (millis() - lastRequest > REQUEST_FREQ || millis() < REQUEST_FREQ ) {
     // OV door endpoint
     String URL = "https://omegav.no/api/dooropen.php";
 
@@ -61,6 +59,7 @@ void loop() {
         digitalWrite(LED_BUILTIN, LOW);
     } else {
       Serial.println("Request failed :(");
+      digitalWrite(LED_BUILTIN, LOW);
     }
 
     http.end();
