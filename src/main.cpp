@@ -20,7 +20,7 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
 
   // connect to WiFi
-  Serial.println("Connecting to WiFi...");
+  Serial.println("Connecting to eduroam...");
 
   // wifi credentials (identity, username, password) must be defined in a credentials.h file
   WiFi.begin(ssid, WPA2_AUTH_PEAP, EAP_IDENTITY, EAP_USERNAME, EAP_PASSWORD);
